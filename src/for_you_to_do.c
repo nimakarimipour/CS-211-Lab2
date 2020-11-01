@@ -223,7 +223,6 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b){
             }
         }
         /*inv(LL)*/
-        /*double y;y = (double *) malloc(sizeof(double) * (end - ib + 1) * (n - end));y[0] =; */
         for (i = ib; i <= end; i++){
             for (k = end + 1; k < n; k++){
                 double sum = 0;
@@ -233,9 +232,6 @@ int mydgetrf_block(double *A, int *ipiv, int n, int b){
                 A[i * n + k] -= sum;
             }
         }
-        /*Delayed update of rest of matrix using matrix-matrix multiplication*/
-        /*void mydgemm(double *A, double *B, double *C, int n, int matx, int maty, int b)*/
-        //if(end!=n)
         mydgemm(&A[(end + 1) * n + ib], &A[ib * n + end + 1], &A[(end + 1) * n + (end + 1)], n, (n - end - 1), (end - ib + 1 /*=b*/), 32);
     }
     return 0;
