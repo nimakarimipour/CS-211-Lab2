@@ -28,19 +28,25 @@ int get_block_size()
 int mydgetrf(double *A, int *ipiv, int n)
 {
     /* add your code here */
-    int i, max_index, t, j, tmp, k;
-    double max;
+    int i = 0;
+    int max_index = 0; 
+    int t = 0;
+    int j = 0;
+    int tmp = 0;
+    int k = 0;
+    double max = 0;
     for (i = 0; i < n - 1; i++)
     {
         /*Pivoting*/
         max_index = i;
-        max = fabs(A[i * n + i]);
+        max = A[i * n + i] > 0 ? A[i * n + i] : (-1 * A[i * n + i]);
         for (t = i + 1; t < n; t++)
         {
-            if (fabs(A[t * n + i]) > max)
+            double pos_value = A[t * n + i] > 0 ? A[t * n + i] : (-1 * A[t * n + i]);
+            if (pos_value > max)
             {
+                max = pos_value;
                 max_index = t;
-                max = fabs(A[t * n + i]);
             }
         }
         if (max == 0)
@@ -49,11 +55,12 @@ int mydgetrf(double *A, int *ipiv, int n)
         }
         else if (max_index != i)
         {
-            /*save pivot information*/
+            /*Save Pivot Information*/
             tmp = ipiv[i];
             ipiv[i] = ipiv[max_index];
             ipiv[max_index] = tmp;
-            /*swap rows*/
+
+            /*Swap Rows*/
             for (j = 0; j < n; j++)
             {
                 double tempv;
@@ -105,8 +112,9 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
     double y[n];
     int i;
     int j;
-    if (UPLO == 'L')
+    switch (UPLO)
     {
+    case 'L':
         y[0] = B[ipiv[0]];
         for (i = 1; i < n; i++)
         {
@@ -117,9 +125,9 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
             }
             y[i] = B[ipiv[i]] - sum;
         }
-    }
-    else if (UPLO == 'U')
-    {
+        break;
+
+    case 'U':
         y[n - 1] = (double)B[n - 1] / A[(n - 1) * n + (n - 1)];
         for (i = n - 2; i >= 0; i--)
         {
@@ -130,6 +138,7 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
             }
             y[i] = (B[i] - sum) / A[i * n + i];
         }
+        break;
     }
     for (i = 0; i < n; i++)
     {
@@ -145,30 +154,46 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
  **/
 void mydgemm(double *A, double *B, double *C, int n, int matx, int maty, int b)
 {
-    int i, j, k, iB, jB, kB;
+    int i = 0;
+    int j = 0;
+    int k = 0;
+    int i_b = 0;
+    int j_b = 0;
+    int k_b = 0;
     for (k = 0; k < maty; k += b)
     {
         for (i = 0; i < matx; i += b)
         {
             for (j = 0; j < matx; j += b)
-            {
-                for (kB = k; kB < k + b && kB < maty; kB += 2)
+            { 
+                for (k_b = k; k_b < k + b && k_b < maty; k_b += 2)
                 {
-                    for (iB = i; iB < i + b && iB < matx; iB += 2)
+                    for (i_b = i; i_b < i + b && i_b < matx; i_b += 2)
                     {
-                        register int regA00 = iB * n + kB;
-                        register int regA10 = regA00 + n;
-                        register double a00 = A[regA00], a01 = A[regA00 + 1], a10 = A[regA10], a11 = A[regA10 + 1];
-                        for (jB = j; jB < j + b && jB < matx; jB += 2)
+                        register int A_0_0 = i_b * n + k_b;
+                        register int A_1_0 = A_0_0 + n;
+                        register double a_0_0 = A[A_0_0];
+                        register double a_0_1 = A[A_0_0 + 1];
+                        register double a_1_0 = A[A_1_0];
+                        register double a_1_1 = A[A_1_0 + 1];
+                        for (j_b = j; j_b < j + b && j_b < matx; j_b += 2)
                         {
-                            register int regB00 = kB * n + jB, regC00 = iB * n + jB;
-                            register int regB10 = regB00 + n, regC10 = regC00 + n;
-                            register double b00 = B[regB00], b01 = B[regB00 + 1], b10 = B[regB10], b11 = B[regB10 + 1];
-                            register double c00 = C[regC00], c01 = C[regC00 + 1], c10 = C[regC10], c11 = C[regC10 + 1];
-                            C[regC00] -= a00 * b00 + a01 * b10;
-                            C[regC00 + 1] -= a00 * b01 + a01 * b11;
-                            C[regC10] -= a10 * b00 + a11 * b10;
-                            C[regC10 + 1] -= a10 * b01 + a11 * b11;
+                            register int B_0_0 = k_b * n + j_b;
+                            register int C_0_0 = i_b * n + j_b;
+                            register int B_1_0 = B_0_0 + n;
+                            register int C_1_0 = C_0_0 + n;
+                            register double c_0_0 = C[C_0_0]; 
+                            register double c_0_1 = C[C_0_0 + 1]; 
+                            register double c_1_0 = C[C_1_0];
+                            register double c_1_1 = C[C_1_0 + 1];
+                            register double b_0_0 = B[B_0_0];
+                            register double b_0_1 = B[B_0_0 + 1]; 
+                            register double b_1_0 = B[B_1_0];
+                            register double b_1_1 = B[B_1_0 + 1];
+                            C[C_0_0] -= a_0_0 * b_0_0 + a_0_1 * b_1_0;
+                            C[C_0_0 + 1] -= a_0_0 * b_0_1 + a_0_1 * b_1_1;
+                            C[C_1_0] -= a_1_0 * b_0_0 + a_1_1 * b_1_0;
+                            C[C_1_0 + 1] -= a_1_0 * b_0_1 + a_1_1 * b_1_1;
                         }
                     }
                 }
