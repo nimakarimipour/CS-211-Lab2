@@ -1,10 +1,10 @@
 #include "../include/for_you_to_do.h"
 
-int get_block_size(){
+int get_block_size()
+{
     //return the block size you'd like to use
     /*add your code here */
     return 128;
-    
 }
 
 /**
@@ -25,38 +25,46 @@ int get_block_size(){
  * 
  **/
 
-int mydgetrf(double *A, int *ipiv, int n){
+int mydgetrf(double *A, int *ipiv, int n)
+{
     /* add your code here */
-    int i, maxind, t, j, temps, k;
+    int i, max_index, t, j, tmp, k;
     double max;
-    for (i = 0; i < n - 1; i++){
+    for (i = 0; i < n - 1; i++)
+    {
         /*Pivoting*/
-        maxind = i;
+        max_index = i;
         max = fabs(A[i * n + i]);
-        for (t = i + 1; t < n; t++){
-            if (fabs(A[t * n + i]) > max){
-                maxind = t;
+        for (t = i + 1; t < n; t++)
+        {
+            if (fabs(A[t * n + i]) > max)
+            {
+                max_index = t;
                 max = fabs(A[t * n + i]);
             }
         }
-        if (max == 0){
+        if (max == 0)
+        {
             return -1;
         }
-        else if (maxind != i){
+        else if (max_index != i)
+        {
             /*save pivot information*/
-            temps = ipiv[i];
-            ipiv[i] = ipiv[maxind];
-            ipiv[maxind] = temps;
+            tmp = ipiv[i];
+            ipiv[i] = ipiv[max_index];
+            ipiv[max_index] = tmp;
             /*swap rows*/
-            for (j = 0; j < n; j++){
+            for (j = 0; j < n; j++)
+            {
                 double tempv;
                 tempv = A[i * n + j];
-                A[i * n + j] = A[maxind * n + j];
-                A[maxind * n + j] = tempv;
+                A[i * n + j] = A[max_index * n + j];
+                A[max_index * n + j] = tempv;
             }
         }
         /*factorization*/
-        for (j = i + 1; j < n; j++){
+        for (j = i + 1; j < n; j++)
+        {
             A[j * n + i] = (double)A[j * n + i] / A[i * n + i];
             for (k = i + 1; k < n; k++)
                 A[j * n + k] = A[j * n + k] - A[j * n + i] * A[i * n + k];
@@ -92,31 +100,39 @@ int mydgetrf(double *A, int *ipiv, int n){
  *      none
  * 
  **/
-void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv){
+void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv)
+{
     double y[n];
     int i;
     int j;
-    if (UPLO == 'L'){
+    if (UPLO == 'L')
+    {
         y[0] = B[ipiv[0]];
-        for (i = 1; i < n; i++){
+        for (i = 1; i < n; i++)
+        {
             double sum = 0;
-            for (j = 0; j < i; j++){
+            for (j = 0; j < i; j++)
+            {
                 sum += y[j] * A[i * n + j];
             }
             y[i] = B[ipiv[i]] - sum;
         }
     }
-    else if (UPLO == 'U'){
+    else if (UPLO == 'U')
+    {
         y[n - 1] = (double)B[n - 1] / A[(n - 1) * n + (n - 1)];
-        for (i = n - 2; i >= 0; i--){
+        for (i = n - 2; i >= 0; i--)
+        {
             double sum = 0;
-            for (j = i + 1; j < n; j++){
+            for (j = i + 1; j < n; j++)
+            {
                 sum += y[j] * A[i * n + j];
             }
             y[i] = (B[i] - sum) / A[i * n + i];
         }
     }
-    for (i = 0; i < n; i++){
+    for (i = 0; i < n; i++)
+    {
         B[i] = y[i];
     }
     return;
@@ -127,17 +143,24 @@ void mydtrsv(char UPLO, double *A, double *B, int n, int *ipiv){
  * Same function as what you used in lab1, cache_part4.c : optimal( ... ).
  * 
  **/
-void mydgemm(double *A, double *B, double *C, int n, int matx, int maty, int b){
+void mydgemm(double *A, double *B, double *C, int n, int matx, int maty, int b)
+{
     int i, j, k, iB, jB, kB;
-    for (k = 0; k < maty; k += b){
-        for (i = 0; i < matx; i += b){
-            for (j = 0; j < matx; j += b){
-                for (kB = k; kB < k + b && kB < maty; kB += 2){
-                    for (iB = i; iB < i + b && iB < matx; iB += 2){
+    for (k = 0; k < maty; k += b)
+    {
+        for (i = 0; i < matx; i += b)
+        {
+            for (j = 0; j < matx; j += b)
+            {
+                for (kB = k; kB < k + b && kB < maty; kB += 2)
+                {
+                    for (iB = i; iB < i + b && iB < matx; iB += 2)
+                    {
                         register int regA00 = iB * n + kB;
                         register int regA10 = regA00 + n;
                         register double a00 = A[regA00], a01 = A[regA00 + 1], a10 = A[regA10], a11 = A[regA10 + 1];
-                        for (jB = j; jB < j + b && jB < matx; jB += 2){
+                        for (jB = j; jB < j + b && jB < matx; jB += 2)
+                        {
                             register int regB00 = kB * n + jB, regC00 = iB * n + jB;
                             register int regB10 = regB00 + n, regC10 = regC00 + n;
                             register double b00 = B[regB00], b01 = B[regB00 + 1], b10 = B[regB10], b11 = B[regB10 + 1];
@@ -182,58 +205,86 @@ void mydgemm(double *A, double *B, double *C, int n, int matx, int maty, int b){
  *      return  0 : return normally 
  * 
  **/
-int mydgetrf_block(double *A, int *ipiv, int n, int b){
-    int i, maxind, k, j, ib, end, temps, t;
+int mydgetrf_block(double *A, int *ipiv, int n, int b)
+{
+    int i = 0;
+    int t = 0;
+    int j = 0;
+    int i_b = 0;
+    int last = 0;
+    int max_index = 0;
+    int k = 0;
+    int tmp = 0;
     double max;
-    for (ib = 0; ib < n - 1; ib += b){
+    for (i_b = 0; i_b < n - 1; i_b += b)
+    {
         /*Partial Pivoting*/
-        end = ((n - 1) > (ib + b - 1)) ? (ib + b - 1) : n - 1;
-        //printf("end = %d\n",end);
-        for (i = ib; i <= end; i++){
-            maxind = i;
-            max = fabs(A[i * n + i]);
-            for (k = i + 1; k < n; k++){
-                if (fabs(A[k * n + i]) > max){
-                    maxind = k;
-                    max = fabs(A[k * n + i]);
+        last = ((n - 1) > (i_b + -1 + b)) ? (i_b - 1 + b) : n - 1;
+        for (i = i_b; i <= last; i++)
+        {
+            max_index = i;
+            max = A[i * n + i] > 0 ? A[i * n + i] : (-1 * A[i * n + i]);
+            for (k = i + 1; k < n; k++)
+            {
+                register double pos_elem = A[k * n + i] > 0 ? A[k * n + i] : (-1 * A[k * n + i]);
+                if (pos_elem > max)
+                {
+                    max_index = k;
+                    max = A[k * n + i] > 0 ? A[k * n + i] : (-1 * A[k * n + i]);
                 }
             }
-            if (max == 0){
+            if (max == 0)
+            {
                 return -1;
             }
-            else if (maxind != i){
+            else if (max_index != i)
+            {
                 /*Save Pivot Infortmation*/
-                temps = ipiv[i];
-                ipiv[i] = ipiv[maxind];
-                ipiv[maxind] = temps;
-                /*Swap rows*/
-                for (j = 0; j < n; j++){
+                tmp = ipiv[i];
+                ipiv[i] = ipiv[max_index];
+                ipiv[max_index] = tmp;
+                /*Swap Rows*/
+                for (j = 0; j < n; j++)
+                {
                     double tempv;
                     tempv = A[i * n + j];
-                    A[i * n + j] = A[maxind * n + j];
-                    A[maxind * n + j] = tempv;
+                    A[i * n + j] = A[max_index * n + j];
+                    A[max_index * n + j] = tempv;
                 }
             }
-            /*Update columns i+1 to end*/
-            for (j = i + 1; j < n; j++){
-                A[j * n + i] = (double)A[j * n + i] / A[i * n + i];
-                for (t = i + 1; t <= end; t++){
-                    A[j * n + t] = A[j * n + t] - A[j * n + i] * A[i * n + t];
+            /*Update columns i+1 until last*/
+            for (j = i + 1; j < n; j++)
+            {
+                /* Since we are going to use the following values very often in indices, we can store the result in a registr */
+                register int j_cross_n = j * n;
+                register int i_cross_n = i * n;
+                A[j_cross_n + i] = (double)A[j_cross_n + i] / A[i_cross_n + i];
+                for (t = i + 1; t <= last; t++)
+                {
+                    A[j_cross_n + t] = A[j_cross_n + t] - A[j_cross_n + i] * A[i_cross_n + t];
                 }
             }
         }
         /*inv(LL)*/
-        for (i = ib; i <= end; i++){
-            for (k = end + 1; k < n; k++){
+        for (i = i_b; i <= last; i++)
+        {
+            for (k = last + 1; k < n; k++)
+            {
                 double sum = 0;
-                for (j = ib; j < i; j++){
+                for (j = i_b; j < i; j++)
+                {
                     sum += A[i * n + j] * A[j * n + k];
                 }
                 A[i * n + k] -= sum;
             }
         }
-        mydgemm(&A[(end + 1) * n + ib], &A[ib * n + end + 1], &A[(end + 1) * n + (end + 1)], n, (n - end - 1), (end - ib + 1 /*=b*/), 32);
+        /* copied and adapted from previous */
+        mydgemm(&A[(last + 1) * n + i_b],
+                &A[i_b * n + last + 1],
+                &A[(last + 1) * n + (last + 1)],
+                n,
+                (n - last - 1), (last - i_b + 1),
+                32);
     }
     return 0;
 }
-
